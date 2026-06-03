@@ -1,0 +1,23 @@
+{
+  "name": "irbnet-export",
+  "version": "1.0.0",
+  "description": "IRBNet export utility",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alanfl/irbnet-export.git"
+  },
+  "author": "alanfl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alanfl/irbnet-export/issues"
+  },
+  "homepage": "https://github.com/alanfl/irbnet-export#readme",
+  "dependencies": {
+    "puppeteer": "^24.40.0",
+    "dotenv": "^16.0.3"
+  }
+}
