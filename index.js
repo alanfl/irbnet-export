@@ -1,11 +1,10 @@
 import puppeteer from "puppeteer";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
-import readline from "readline";
 import 'dotenv/config'
 
 
-const OUTPUT_DIR = "output";
+const OUTPUT_DIR = process.env.OUTPUT_DIR || "output";
 const METADATA_PATH = path.join(OUTPUT_DIR, "metadata.json");
 
 let browser; // Global browser instance
@@ -66,7 +65,7 @@ function getBrowserLaunchOptions() {
     const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     const headless = process.env.PUPPETEER_HEADLESS === "true";
     const launchOptions = {
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
         headless: headless
     };
 
