@@ -20,25 +20,12 @@ async function main() {
         await login(page, process.env.IRBNET_USERNAME, process.env.IRBNET_PASSWORD);
     } catch (error) {
         console.error("Could not log in. Check credentials in .env file. Error:", error);
-        await browser.close();
+        process.exitCode = 1;
         return;
     }
 
-    // console.log("Fetching projects...");
-    // const all_projects = await getAllProjects(page);
-
-    // DEBUG: dummy
-    const all_projects = {
-        "projects": [
-            {
-                "projectId": "2231737",
-                "projectLink": "https://www.irbnet.org/release/study/overview.do?ctx_id=0&spk_id=2231737",
-                "projectTitle": "Collaborative Research: SaTC: CORE: Medium: Beyond App-centric Privacy: Investigating Privacy Ecosystems among Vulnerable Populations",
-                "status": "Approved",
-                "packages": []
-            }
-        ]
-    }
+    console.log("Fetching projects...");
+    const all_projects = await getAllProjects(page);
 
     // For each project, create a corresponding directory in output
     for (const project of all_projects.projects) {
@@ -50,16 +37,31 @@ async function main() {
         console.log(`Processing project: ${project.projectTitle} (ID: ${project.projectId})`);
         const packages = await getAllPackages(project);
 
-
         project.packages = packages;
     }
 
     await mkdir(OUTPUT_DIR, { recursive: true });
     await writeFile(METADATA_PATH, JSON.stringify(all_projects, null, 2) + "\n");
+
 }
 
-main();
-
+try {
+    await main();
+} catch (error) {
+    console.error("Export failed:", error);
+    process.exitCode = 1;
+} finally {
+    if (browser) {
+        try {
+            await browser.close();
+            console.log("Browser closed.");
+        } catch (error) {
+            console.error("Could not close the browser cleanly:", error);
+            process.exitCode = 1;
+        }
+    }
+}
+ 
 function getBrowserLaunchOptions() {
     const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     const headless = process.env.PUPPETEER_HEADLESS === "true";
@@ -106,7 +108,7 @@ async function getAllPackages(project) {
             const descriptionElement = row.querySelector(".yui-dt-col-documentDescription span");
 
             return {
-                packageNumber: getText(".pkg-nbr-col .yui-dt-liner"),
+                packageNumber: getText(".pkg-nbr-col .yui-dt-liner") || "1",
                 documentType: getText(".yui-dt-col-documentType .document-type"),
                 description: descriptionElement?.getAttribute("title")?.trim()
                     || descriptionElement?.textContent.trim()
@@ -252,18 +254,6 @@ async function getAllProjects(page) {
             all_projects.projects.push({ ...project, packages: [] });
         }
 
-        // DEBUGGING: log status of next-page controls
-        // let nextPageControls = await page.$$eval("#yui-pg0-1-next-link", elements => elements.map((element, index) => ({
-        //     index,
-        //     tagName: element.tagName,
-        //     text: element.textContent.trim(),
-        //     href: element.getAttribute("href"),
-        //     className: element.className,
-        //     ariaDisabled: element.getAttribute("aria-disabled"),
-        //     visible: Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
-        // })));
-        // console.log("Next-page controls:", nextPageControls);
-
         // Check if element with id "yui-pg0-1-next-link" is an anchor and not a span (indicating there are more pages)
         let nextPageElement = await page.$("#yui-pg0-1-next-link");
         if (nextPageElement) {
@@ -295,7 +285,6 @@ async function getAllProjects(page) {
     console.log(`Fetched a total of ${all_projects.projects.length} unique projects.`);
     return all_projects;
 }
-
 
 async function fetchProjectsOnPage(page) {
     const projects = await page.$$eval("tbody.yui-dt-data > tr", rows => rows.map(tr => {
