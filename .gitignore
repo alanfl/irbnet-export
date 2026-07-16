@@ -4,6 +4,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -49,6 +50,9 @@ web_modules/
 
 # Optional npm cache directory
 .npm
+
+# Optional pnpm cache/store directory
+.pnpm-store/
 
 # Optional eslint cache
 .eslintcache
@@ -133,10 +137,20 @@ dist
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Common JS tooling caches
+.vite/
+.turbo/
+.swc/
+.rpt2_cache/
+.jest/
 
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Project-specific
-exports/*
+output/*
+AGENTS.md
