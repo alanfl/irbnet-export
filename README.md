@@ -4,6 +4,20 @@ A small Puppeteer utility for exporting projects and downloadable documents from
 
 ## Run with Docker
 
+### just give me my documents
+
+The working directory where you want your downloads must contain an `output` folder.
+
+```
+docker run --rm \
+  -e IRBNET_USERNAME="your irbnet username" \
+  -e IRBNET_PASSWORD="your irbnet password" \
+  --mount type=bind,source="$(pwd)/output",target=/app/output \
+  alanfluo/irbnet-export
+```
+
+### if you've cloned the repository
+
 Build the image:
 
 ```sh
@@ -68,4 +82,4 @@ node index.js
 ```
 
 ## Generative AI Disclosure
-This project was built using generative AI tools. Use at your own risk.
+This project was built with the help of generative AI tools. Use at your own risk.
